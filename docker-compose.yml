@@ -11,6 +11,8 @@ services:
       - POSTGRES_DB=challenge
     ports:
       - '65432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   spring:
     container_name: app
@@ -26,3 +28,6 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       - postgres
+
+volumes:
+  postgres_data:
