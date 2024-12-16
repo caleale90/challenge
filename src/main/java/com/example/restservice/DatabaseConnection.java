@@ -4,7 +4,7 @@ import java.sql.*;
 
 
 public class DatabaseConnection {
-    String jdbcUrl = "jdbc:postgresql://localhost:5432/challenge";
+    String jdbcUrl = "jdbc:postgresql://postgres:5432/challenge";
     String username = "postgres";
     String password = "postgres";
     Connection connection;
