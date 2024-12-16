@@ -76,7 +76,7 @@ public class DatabaseController {
 
     public List<UserInteraction> historyByUsernameAndType(String username, InteractionType interactionType) throws SQLException {
         ArrayList<UserInteraction> userInteractions = new ArrayList<>();
-        String query = getString(interactionType);
+        String query = historyQuery(interactionType);
         try (ResultSet resultSet = databaseConnection.executeQuery(query, username)) {
             while (resultSet.next()) {
                 String title = resultSet.getString("title");
@@ -89,13 +89,13 @@ public class DatabaseController {
         return userInteractions;
     }
 
-    private String getString(InteractionType interactionType) {
+    private String historyQuery(InteractionType interactionType) {
         String query = "SELECT username, title, rating, view_percentage, implicit_rating FROM public.ratings JOIN public.users ON users.user_id = ratings.user_id JOIN public.movies ON movies.movie_id = ratings.movie_id WHERE username = ? AND ";
 
         if (interactionType == InteractionType.RATING) {
             query += "implicit_rating = false";
         } else {
-            query += "implicit_rating = true";
+            query += "view_percentage IS NOT NULL";
         }
         return query;
     }
