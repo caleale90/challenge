@@ -12,7 +12,7 @@ services:
     ports:
       - '65432:5432'
 
-  recipe:
+  spring:
     container_name: app
     build:
       context: .
