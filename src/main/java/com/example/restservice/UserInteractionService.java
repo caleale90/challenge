@@ -2,30 +2,26 @@ package com.example.restservice;
 
 import model.InteractionType;
 import model.UserInteraction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.List;
 
 @Service
 public class UserInteractionService {
 
-    DatabaseController databaseController;
+    @Autowired
+    RatingRepository ratingRepository;
 
-    public UserInteractionService() {
-        this.databaseController = new DatabaseController();
-    }
-
-    public List<UserInteraction> getUserInteractions(String username, String type) throws SQLException {
+    public List<UserInteraction> getUserInteractions(String username, String type) {
         if (type == null || type.isEmpty()) {
-            return databaseController.historyByUser(username);
+            return ratingRepository.historyByUser(username);
         }
-
         switch (type.toLowerCase()) {
             case "ratings":
-                return databaseController.historyByUsernameAndType(username, InteractionType.RATING);
+                return ratingRepository.historyByUsernameAndType(username, InteractionType.RATING.toString());
             case "views":
-                return databaseController.historyByUsernameAndType(username, InteractionType.VIEW);
+                return  ratingRepository.historyByUsernameAndType(username, InteractionType.VIEW.toString());
             default:
                 throw new IllegalArgumentException("Invalid interaction type: " + type);
         }
