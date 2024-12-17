@@ -62,6 +62,6 @@ public class RecommendationSystemController {
 
     @GetMapping("/recommend")
     public ResponseEntity<Set<String>> getRecommendationFor(@RequestParam String username) {
-        return ResponseEntity.status(HttpStatus.OK).body(recommendationSystem.recommendByUsername(username));
+        return ResponseEntity.status(HttpStatus.OK).body(recommendationSystem.recommendMovies(username));
     }
 }
