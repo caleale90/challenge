@@ -1,6 +1,7 @@
 package com.example.restservice;
 
 import jakarta.transaction.Transactional;
+import model.UserInteraction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -56,22 +57,27 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
                               @Param("minRating") Integer minRating,
                               @Param("maxRating") Integer maxRating);
 
-    @Query("SELECT m.title, r.rating, r.viewPercentage, r.implicitRating " +
+    @Query("SELECT new model.UserInteraction(m.title, r.rating, " +
+            "CASE WHEN r.viewPercentage IS NOT NULL THEN r.viewPercentage ELSE NULL END, " +
+            "CASE WHEN r.implicitRating IS NOT NULL THEN r.implicitRating ELSE NULL END) " +
             "FROM Rating r " +
             "JOIN r.user u " +
             "JOIN r.movie m " +
             "WHERE u.username = :username")
-    List<Object[]> historyByUser(@Param("username") String username);
+    List<UserInteraction> historyByUser(@Param("username") String username);
 
-    @Query("SELECT m.title, r.rating, r.viewPercentage, r.implicitRating " +
+    @Query("SELECT new model.UserInteraction(m.title, r.rating, " +
+            "CASE WHEN r.viewPercentage IS NOT NULL THEN r.viewPercentage ELSE NULL END, " +
+            "CASE WHEN r.implicitRating IS NOT NULL THEN r.implicitRating ELSE NULL END) " +
             "FROM Rating r " +
             "JOIN r.user u " +
             "JOIN r.movie m " +
             "WHERE u.username = :username " +
             "AND (:interactionType = 'RATING' AND r.implicitRating = false " +
             "OR :interactionType != 'RATING' AND r.viewPercentage IS NOT NULL)")
-    List<Object[]> historyByUsernameAndType(@Param("username") String username,
-                                            @Param("interactionType") String interactionType);
+    List<UserInteraction> historyByUsernameAndType(@Param("username") String username,
+                                                   @Param("interactionType") String interactionType);
+
 
     @Query("SELECT m.genres " +
             "FROM Rating r " +
