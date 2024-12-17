@@ -7,9 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,12 +36,12 @@ public class ViewEventControllerTest {
     private Long validMovieId = 1L;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         viewEventController = spy(viewEventController);
     }
 
     @Test
-    public void testSaveViewWhenRatingDoesNotExist() {
+    void testSaveViewWhenRatingDoesNotExist() {
         when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
         when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
@@ -54,7 +55,7 @@ public class ViewEventControllerTest {
     }
 
     @Test
-    public void testSaveViewWhenRatingExists() {
+    void testSaveViewWhenRatingExists() {
         when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
         when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
@@ -69,7 +70,7 @@ public class ViewEventControllerTest {
 
 
     @Test
-    public void testSaveViewWhenMovieNotFound() {
+    void testSaveViewWhenMovieNotFound() {
         when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.empty());
 
         try {
@@ -83,7 +84,7 @@ public class ViewEventControllerTest {
     }
 
     @Test
-    public void testSaveViewWhenUserNotFound() {
+    void testSaveViewWhenUserNotFound() {
         when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
         when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.empty());
 
@@ -99,7 +100,7 @@ public class ViewEventControllerTest {
     }
 
     @Test
-    public void testUpdateExistingRatingWhenImplicit() {
+    void testUpdateExistingRatingWhenImplicit() {
         doReturn(true).when(viewEventController).isImplicitRating(validUserId, validMovieId);
 
         doNothing().when(ratingRepository).updateRatingAndImplicitRating(rating, true, validUserId, validMovieId);
@@ -113,7 +114,7 @@ public class ViewEventControllerTest {
     }
 
     @Test
-    public void testUpdateExistingRatingWhenIsNotImplicit() {
+    void testUpdateExistingRatingWhenIsNotImplicit() {
         doReturn(false).when(viewEventController).isImplicitRating(validUserId, validMovieId);
 
         viewEventController.updateExistingRating(viewPercentage, validUserId, validMovieId, rating);
@@ -123,4 +124,23 @@ public class ViewEventControllerTest {
         verify(ratingRepository, times(1)).updateViewPercentage(validUserId, validMovieId, viewPercentage);
     }
 
+    @Test
+    void testIsImplicitRatingWhenNull() {
+        ArrayList<Rating> ratings = new ArrayList<>();
+        ratings.add(new Rating(new User("username"), new Movie("movie", "genre"), 3, 3, null));
+
+        when(ratingRepository.findRatingsByUserAndMovie(validUserId, validMovieId)).thenReturn(ratings);
+
+        assertFalse(viewEventController.isImplicitRating(validUserId,validMovieId));
+    }
+
+    @Test
+    void testIsImplicitRating() {
+        ArrayList<Rating> ratings = new ArrayList<>();
+        ratings.add(new Rating(new User("username"), new Movie("movie", "genre"), 3, 3, true));
+
+        when(ratingRepository.findRatingsByUserAndMovie(validUserId, validMovieId)).thenReturn(ratings);
+
+        assertTrue(viewEventController.isImplicitRating(validUserId,validMovieId));
+    }
 }
