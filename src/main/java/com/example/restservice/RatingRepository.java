@@ -32,11 +32,10 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             "VALUES (:userId, :movieId, :rating, false)", nativeQuery = true)
     void insertRating(@Param("userId") Long userId, @Param("movieId") Long movieId, @Param("rating") int rating);
 
-    // TODO: sistemare qui perché non ricalcola il rating
     @Modifying
     @Transactional
-    @Query("UPDATE Rating r SET r.viewPercentage = :percentage WHERE r.user.id = :userId AND r.movie.id = :movieId")
-    void updateViewPercentage(@Param("userId") Long userId, @Param("movieId") Long movieId, @Param("percentage") int percentage);
+    @Query("UPDATE Rating r SET r.viewPercentage = :viewPercentage WHERE r.user.id = :userId AND r.movie.id = :movieId")
+    void updateViewPercentage(@Param("userId") Long userId, @Param("movieId") Long movieId, @Param("viewPercentage") int viewPercentage);
 
     @Modifying
     @Transactional
