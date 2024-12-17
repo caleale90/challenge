@@ -48,11 +48,11 @@ public class Rating {
         return rating;
     }
 
-    public int getViewPercentage() {
+    public Integer getViewPercentage() {
         return viewPercentage;
     }
 
-    public boolean getImplicitRating() {
+    public Boolean getImplicitRating() {
         return implicitRating;
     }
 }
