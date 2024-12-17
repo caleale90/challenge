@@ -131,16 +131,26 @@ public class ViewEventControllerTest {
 
         when(ratingRepository.findRatingsByUserAndMovie(validUserId, validMovieId)).thenReturn(ratings);
 
-        assertFalse(viewEventController.isImplicitRating(validUserId,validMovieId));
+        assertTrue(viewEventController.isImplicitRating(validUserId,validMovieId));
     }
 
     @Test
-    void testIsImplicitRating() {
+    void testIsImplicitRatingWhenTrue() {
         ArrayList<Rating> ratings = new ArrayList<>();
         ratings.add(new Rating(new User("username"), new Movie("movie", "genre"), 3, 3, true));
 
         when(ratingRepository.findRatingsByUserAndMovie(validUserId, validMovieId)).thenReturn(ratings);
 
         assertTrue(viewEventController.isImplicitRating(validUserId,validMovieId));
+    }
+
+    @Test
+    void testIsImplicitRatingWhenFalse() {
+        ArrayList<Rating> ratings = new ArrayList<>();
+        ratings.add(new Rating(new User("username"), new Movie("movie", "genre"), 3, 3, false));
+
+        when(ratingRepository.findRatingsByUserAndMovie(validUserId, validMovieId)).thenReturn(ratings);
+
+        assertFalse(viewEventController.isImplicitRating(validUserId,validMovieId));
     }
 }

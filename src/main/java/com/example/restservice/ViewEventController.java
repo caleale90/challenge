@@ -36,7 +36,7 @@ public class ViewEventController extends EventController {
     protected boolean isImplicitRating(Long userId, Long movieId) {
         return ratingRepository.findRatingsByUserAndMovie(userId, movieId).stream()
                 .findFirst()
-                .map(Rating::getImplicitRating)
+                .map(rating -> rating.getImplicitRating() == null || rating.getImplicitRating())
                 .orElse(false);
     }
 
