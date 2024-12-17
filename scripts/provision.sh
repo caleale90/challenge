@@ -12,7 +12,7 @@ docker compose up --build -d
 
 sleep 3
 
-docker cp src/main/resources/dump.sql postgres:/tmp/script.sql
+docker cp src/main/resources/dump_db.sql postgres:/tmp/script.sql
 
 docker exec postgres psql -U postgres -d challenge -f /tmp/script.sql
 
