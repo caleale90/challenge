@@ -1,94 +1,87 @@
 package com.example.restservice;
 
-import model.Movie;
-import model.Rating;
-import model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.SQLException;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-class RatingEventControllerTest {
-
-    @Mock
-    private User user;
-
-    @Mock
-    private Movie movie;
+@ExtendWith(MockitoExtension.class)
+public class RatingEventControllerTest {
 
     @Mock
-    private Rating rating;
+    private MovieRepository movieRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private RatingRepository ratingRepository;
 
     @InjectMocks
     private RatingEventController ratingEventController;
 
+    private final String validUsername = "john_doe";
+    private final String validMovieTitle = "Inception";
+    private final Integer validRating = 5;
+    private final Long validMovieId = 1L;
+    private final Long validUserId = 1L;
+
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
         ratingEventController = spy(ratingEventController);
     }
 
     @Test
-    void testSaveRatingWhenRatingExists() throws SQLException {
-        when(movie.getTitle()).thenReturn("title");
-        when(user.getUsername()).thenReturn("username");
-        when(ratingEventController.getMovieId("title")).thenReturn(1);
-        when(ratingEventController.getUserId("username")).thenReturn(1);
-        when(rating.getRatingValue()).thenReturn(3);
-        when(ratingEventController.ratingExists(user, movie)).thenReturn(true);
+    public void testSaveRatingWhenRatingDoesNotExist() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(java.util.Optional.of(validMovieId));
+        when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
-        doNothing().when(ratingEventController).updateRating(1, 1, 3, false);
+        when(ratingEventController.ratingExists(validUserId, validMovieId)).thenReturn(false);
 
-        ratingEventController.saveRating(user, movie, rating);
+        ratingEventController.saveRating(validUsername, validMovieTitle, validRating);
 
-        verify(ratingEventController, times(1)).updateRating(1, 1, 3, false);
-        verify(ratingEventController, never()).storeRating(anyInt(), anyInt(), anyInt());
-
+        verify(ratingRepository, times(1)).insertRating(validUserId, validMovieId, validRating);
+        verify(ratingRepository, never()).updateRatingAndImplicitRating(anyInt(), anyBoolean(), anyLong(), anyLong());
     }
 
     @Test
-    void testSaveRatingWhenRatingDoesNotExist() throws SQLException {
-        when(movie.getTitle()).thenReturn("title");
-        when(user.getUsername()).thenReturn("username");
-        when(ratingEventController.getMovieId("title")).thenReturn(1);
-        when(ratingEventController.getUserId("username")).thenReturn(1);
-        when(rating.getRatingValue()).thenReturn(3);
+    public void testSaveRatingWhenRatingExists() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
+        when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
-        doNothing().when(ratingEventController).storeRating(1, 1, 3);
+        when(ratingEventController.ratingExists(validUserId, validMovieId)).thenReturn(true);
 
-        ratingEventController.saveRating(user, movie, rating);
+        ratingEventController.saveRating(validUsername, validMovieTitle, validRating);
 
-        verify(ratingEventController, never()).updateRating(anyInt(), anyInt(), anyInt(), anyBoolean());
-        verify(ratingEventController, times(1)).storeRating(1, 1, 3);
+        verify(ratingRepository, never()).insertRating(anyLong(), anyLong(), anyInt());
+        verify(ratingRepository, times(1)).updateRatingAndImplicitRating(validRating, false, validUserId, validMovieId);
     }
 
     @Test
-    void testUpdateRating() throws SQLException {
-        DatabaseConnection mockDbConnection = mock(DatabaseConnection.class);
-        ReflectionTestUtils.setField(ratingEventController, "databaseConnection", mockDbConnection);
-        String query = "UPDATE public.ratings SET rating = ?, implicit_rating = ? WHERE user_id = ? AND movie_id = ?";
+    public void testSaveRatingWhenMovieDoesNotExist() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(java.util.Optional.empty());
 
-        doNothing().when(mockDbConnection).updateRatingQuery(query, 1, true, 3, 1);
-
-        ratingEventController.updateRating(1, 1, 3, true);
-        verify(mockDbConnection, times(1)).updateRatingQuery(query, 3, true, 1, 1);
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                ratingEventController.saveRating(validUsername, validMovieTitle, validRating)
+        );
+        assertEquals("Movie not found", exception.getMessage());
     }
 
     @Test
-    void testStoreRating() throws SQLException {
-        DatabaseConnection mockDbConnection = mock(DatabaseConnection.class);
-        ReflectionTestUtils.setField(ratingEventController, "databaseConnection", mockDbConnection);
-        String query = "INSERT INTO public.ratings (user_id, movie_id, rating, implicit_rating) VALUES (?, ?, ?, false)";
+    public void testSaveRatingWhenUserDoesNotExist() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(java.util.Optional.of(validMovieId));
+        when(userRepository.findUserIdByUsername(validUsername)).thenReturn(java.util.Optional.empty());
 
-        doNothing().when(mockDbConnection).insertQuery(query, 1, 1, 3);
-
-        ratingEventController.storeRating(1, 1, 3);
-        verify(mockDbConnection, times(1)).insertQuery(query, 1, 1, 3);
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                ratingEventController.saveRating(validUsername, validMovieTitle, validRating)
+        );
+        assertEquals("User not found", exception.getMessage());
     }
 }
