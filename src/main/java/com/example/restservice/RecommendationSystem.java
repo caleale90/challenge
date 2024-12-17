@@ -20,9 +20,8 @@ public class RecommendationSystem {
         String pattern = "%(" + String.join("|", favouriteGenres) + ")%";
         Set<String> otherMoviesOfSameGenres = ratingRepository.findRecommendedMovies(pattern);
         Set<String> ratedFilms = ratingRepository.findRatedFilms(username);
-        Set<String> recomandedMovies = new HashSet<>(otherMoviesOfSameGenres);
-        recomandedMovies.removeAll(ratedFilms);
-        return recomandedMovies;
+        otherMoviesOfSameGenres.removeAll(ratedFilms);
+        return otherMoviesOfSameGenres;
     }
 
     protected Set<String> extractGenres(List<String> favouriteGenresByUsername) {
