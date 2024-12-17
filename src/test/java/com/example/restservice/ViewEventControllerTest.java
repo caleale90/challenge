@@ -1,98 +1,125 @@
 package com.example.restservice;
 
-import model.Movie;
-import model.Percentage;
-import model.Rating;
-import model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.SQLException;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ViewEventControllerTest {
 
     @Mock
-    private User user;
+    private MovieRepository movieRepository;
 
     @Mock
-    private Movie movie;
+    private UserRepository userRepository;
 
     @Mock
-    private Percentage percentage;
+    private RatingRepository ratingRepository;
 
     @InjectMocks
     private ViewEventController viewEventController;
 
+    private String validUsername = "john_doe";
+    private String validMovieTitle = "Inception";
+    private Integer percentage = 80;
+    private Integer rating = 4;
+    private Long validUserId = 1L;
+    private Long validMovieId = 1L;
+
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
         viewEventController = spy(viewEventController);
     }
 
     @Test
-    void testSaveViewWhenRatingExists() throws SQLException {
-        when(movie.getTitle()).thenReturn("Movie Title");
-        when(user.getUsername()).thenReturn("user123");
-        when(percentage.getValue()).thenReturn(50);
+    public void testSaveViewWhenRatingDoesNotExist() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
+        when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
-        when(viewEventController.getMovieId("Movie Title")).thenReturn(1);
-        when(viewEventController.getUserId("user123")).thenReturn(1);
-        when(viewEventController.ratingExists(user, movie)).thenReturn(true);
+        when(viewEventController.ratingExists(validUserId, validMovieId)).thenReturn(false);
 
-        doNothing().when(viewEventController).updatePercentage(1, 1, 50);
+        viewEventController.saveView(validUsername, validMovieTitle, percentage);
 
-        viewEventController.saveView(user, movie, percentage);
-
-        verify(viewEventController).updatePercentage(1, 1, 50);
-        verify(viewEventController, never()).storeRatingWithPercentage(anyInt(), anyInt(), anyInt(), anyInt());
+        verify(ratingRepository, times(1)).insertRatingWithPercentage(validUserId, validMovieId, 4, percentage);
+        verify(ratingRepository, never()).updateRatingAndImplicitRating(anyInt(), anyBoolean(), anyLong(), anyLong());
+        verify(ratingRepository, never()).updateViewPercentage(anyLong(), anyLong(), anyInt());
     }
 
     @Test
-    void testSaveViewWhenRatingDoesNotExist() throws SQLException {
-        when(movie.getTitle()).thenReturn("Movie Title");
-        when(user.getUsername()).thenReturn("user123");
-        when(percentage.toRating()).thenReturn(new Rating(3));
-        when(percentage.getValue()).thenReturn(50);
+    public void testSaveViewWhenRatingExists() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
+        when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
-        when(viewEventController.getMovieId("Movie Title")).thenReturn(1);
-        when(viewEventController.getUserId("user123")).thenReturn(1);
-        when(viewEventController.ratingExists(user, movie)).thenReturn(false);
+        when(viewEventController.ratingExists(validUserId, validMovieId)).thenReturn(true);
+        doNothing().when(viewEventController).updateExistingRating(percentage, validUserId, validMovieId, rating);
 
-        doNothing().when(viewEventController).storeRatingWithPercentage(1, 1, 3, 50);
+        viewEventController.saveView(validUsername, validMovieTitle, percentage);
 
-        viewEventController.saveView(user, movie, percentage);
+        verify(viewEventController, times(1)).updateExistingRating(percentage, validUserId, validMovieId, rating);
+        verify(ratingRepository, never()).insertRatingWithPercentage(anyLong(), anyLong(), anyInt(), anyInt());
+    }
 
-        verify(viewEventController, never()).updatePercentage(anyInt(), anyInt(), anyInt());
-        verify(viewEventController).storeRatingWithPercentage(1, 1, 3, 50);
+
+    @Test
+    public void testSaveViewWhenMovieNotFound() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.empty());
+
+        try {
+            viewEventController.saveView(validUsername, validMovieTitle, percentage);
+        } catch (RuntimeException e) {
+            assertEquals("Movie not found", e.getMessage());
+        }
+
+        verify(viewEventController, never()).ratingExists(anyLong(), anyLong());
+        verify(ratingRepository, never()).insertRatingWithPercentage(anyLong(), anyLong(), anyInt(), anyInt());
     }
 
     @Test
-    void testUpdatePercentage() throws SQLException {
-        DatabaseConnection mockDbConnection = mock(DatabaseConnection.class);
-        ReflectionTestUtils.setField(viewEventController, "databaseConnection", mockDbConnection);
-        String query = "UPDATE public.ratings SET view_percentage = ? WHERE user_id = ? AND movie_id = ?";
-        doNothing().when(mockDbConnection).updateOnlyPercentageQuery(query, 1, 1, 75);
+    public void testSaveViewWhenUserNotFound() {
+        when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.of(validMovieId));
+        when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.empty());
 
-        viewEventController.updatePercentage(1, 1, 75);
+        try {
+            viewEventController.saveView(validUsername, validMovieTitle, percentage);
+        } catch (RuntimeException e) {
+            assertEquals("User not found", e.getMessage());
+        }
 
-        verify(mockDbConnection, times(1)).updateOnlyPercentageQuery(query, 1, 1, 75);
+        verify(ratingRepository, never()).insertRatingWithPercentage(anyLong(), anyLong(), anyInt(), anyInt());
+        verify(ratingRepository, never()).updateRatingAndImplicitRating(anyInt(), anyBoolean(), anyLong(), anyLong());
+        verify(ratingRepository, never()).updateViewPercentage(anyLong(), anyLong(), anyInt());
     }
 
     @Test
-    void testStoreRatingWithPercentage() throws SQLException {
-        DatabaseConnection mockDbConnection = mock(DatabaseConnection.class);
-        ReflectionTestUtils.setField(viewEventController, "databaseConnection", mockDbConnection);
-        String query = "INSERT INTO public.ratings (user_id, movie_id, rating, view_percentage, implicit_rating) VALUES (?, ?, ?, ?, true)";
-        doNothing().when(mockDbConnection).insertQuery(anyString(), anyInt(), anyInt(), anyInt(), anyInt());
+    public void testUpdateExistingRatingWhenImplicit() {
+        doReturn(true).when(viewEventController).isImplicitRating(validUserId, validMovieId);
 
-        viewEventController.storeRatingWithPercentage(1, 1, 5, 75);
+        doNothing().when(ratingRepository).updateRatingAndImplicitRating(rating, true, validUserId, validMovieId);
 
-        verify(mockDbConnection, times(1)).insertQuery(query, 1, 1, 5, 75);
+        viewEventController.updateExistingRating(percentage, validUserId, validMovieId, rating);
+
+        verify(viewEventController, times(1)).isImplicitRating(validUserId, validMovieId);
+        verify(ratingRepository, times(1)).updateRatingAndImplicitRating(4, true, validUserId, validMovieId);
+        verify(ratingRepository, never()).updateViewPercentage(anyLong(), anyLong(), anyInt());
     }
+
+    @Test
+    public void testUpdateExistingRatingWhenIsNotImplicit() {
+        doReturn(false).when(viewEventController).isImplicitRating(validUserId, validMovieId);
+
+        viewEventController.updateExistingRating(percentage, validUserId, validMovieId, rating);
+
+        verify(viewEventController, times(1)).isImplicitRating(validUserId, validMovieId);
+        verify(ratingRepository, never()).updateRatingAndImplicitRating(anyInt(), anyBoolean(), anyLong(), anyLong());
+        verify(ratingRepository, times(1)).updateViewPercentage(validUserId, validMovieId, percentage);
+    }
+
 }

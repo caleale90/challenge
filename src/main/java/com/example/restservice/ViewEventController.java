@@ -1,36 +1,40 @@
 package com.example.restservice;
 
-import model.Movie;
-import model.Percentage;
-import model.User;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.util.List;
 
 @Service
 public class ViewEventController extends EventController {
 
-    public ViewEventController() throws SQLException {
-        super();
+
+    public ViewEventController(MovieRepository movieRepository, UserRepository userRepository, RatingRepository ratingRepository) throws SQLException {
+        super(movieRepository, userRepository, ratingRepository);
     }
 
-    public void saveView(User user, Movie movie, Percentage percentage) throws SQLException {
-        int movieId = getMovieId(movie.getTitle());
-        int userId = getUserId(user.getUsername());
-        if (ratingExists(user, movie)) {
-            updatePercentage(userId, movieId, percentage.getValue());
+    public void saveView(String username, String movieTitle, Integer percentage) {
+        Long movieId = movieRepository.findIdByTitle(movieTitle).orElseThrow(() -> new RuntimeException("Movie not found"));
+        Long userId = userRepository.findUserIdByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        int rating = percentage * 5 / 100;
+
+        if (ratingExists(userId, movieId)) {
+            updateExistingRating(percentage, userId, movieId, rating);
         } else {
-            storeRatingWithPercentage(userId, movieId, percentage.toRating().getRatingValue(), percentage.getValue());
+            ratingRepository.insertRatingWithPercentage(userId, movieId, rating, percentage);
         }
     }
 
-    protected void updatePercentage(int userId, int movieId, int percentage) throws SQLException {
-        String query = "UPDATE public.ratings SET view_percentage = ? WHERE user_id = ? AND movie_id = ?";
-        databaseConnection.updateOnlyPercentageQuery(query, userId, movieId, percentage);
+    void updateExistingRating(Integer percentage, Long userId, Long movieId, Integer rating) {
+        if (isImplicitRating(userId, movieId)) {
+            ratingRepository.updateRatingAndImplicitRating(rating, true, userId, movieId);
+        } else
+            ratingRepository.updateViewPercentage(userId, movieId, percentage);
     }
 
-    protected void storeRatingWithPercentage(int userId, int movieId, int rating, int viewPercentage) throws SQLException {
-        String query = "INSERT INTO public.ratings (user_id, movie_id, rating, view_percentage, implicit_rating) VALUES (?, ?, ?, ?, true)";
-        databaseConnection.insertQuery(query, userId, movieId, rating, viewPercentage);
+    protected boolean isImplicitRating(Long userId, Long movieId) {
+        List<Rating> ratingsByUserAndMovie = ratingRepository.findRatingsByUserAndMovie(userId, movieId);
+        return ratingsByUserAndMovie.get(0).getImplicitRating();
     }
+
 }
