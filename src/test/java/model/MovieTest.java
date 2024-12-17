@@ -1,5 +1,6 @@
 package model;
 
+import com.example.restservice.Movie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ class MovieTest {
 
     @BeforeEach
     void setUp() {
-        movie = new Movie("Fake title");
+        movie = new Movie("Fake title", "Genre1|Genre2");
     }
 
     @Test
@@ -21,6 +22,6 @@ class MovieTest {
 
     @Test
     void testToString() {
-        assertEquals("Movie{title='Fake title'}", movie.toString());
+        assertEquals("Movie[title='Fake title', genres='Genre1|Genre2']", movie.toString());
     }
 }
