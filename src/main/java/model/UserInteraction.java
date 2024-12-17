@@ -1,42 +1,34 @@
 package model;
 
+import java.util.Optional;
+
 public class UserInteraction {
 
-    private Movie movie;
-    private Rating rating;
-    private Percentage percentage;
-    private boolean implicitRating;
+    private String movieTitle;
+    private Integer rating;
+    private Optional<Integer> percentage;
+    private Optional<Boolean> implicitRating;
 
-    public UserInteraction(Movie movie, Rating rating, Percentage percentage, boolean implicitRating) {
-        this.movie = movie;
+    public UserInteraction(String movie, Integer rating, Integer percentage, Boolean implicitRating) {
+        this.movieTitle = movie;
         this.rating = rating;
-        this.percentage = percentage;
-        this.implicitRating = implicitRating;
+        this.percentage = Optional.ofNullable(percentage);
+        this.implicitRating = Optional.ofNullable(implicitRating);
     }
 
-    public Movie getMovie() {
-        return movie;
+    public String getMovieTitle() {
+        return movieTitle;
     }
 
-    public Rating getRating(){
+    public int getRating() {
         return rating;
     }
 
-    public Percentage getPercentage(){
+    public Optional<Integer> getPercentage() {
         return percentage;
     }
 
-    public boolean getImplicitRating(){
+    public Optional<Boolean> getImplicitRating() {
         return implicitRating;
     }
-
-    @Override
-    public String toString() {
-        return "UserRating{" +
-                "movie=" + (movie != null ? movie.getTitle() : "N/A") +
-                ", rating=" + (rating != null ? rating : "N/A") +
-                ", percentage=" + (percentage != null ? percentage.getValue() : "N/A") +
-                '}';
-    }
-
 }
