@@ -2,18 +2,16 @@ package com.example.restservice;
 
 import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import requests.RatingRequest;
 import requests.ViewRequest;
-import validation.MovieValidator;
-import validation.PercentageValidator;
-import validation.RatingValidator;
-import validation.UsernameValidator;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class RecommendationSystemController {
@@ -22,7 +20,7 @@ public class RecommendationSystemController {
     UserInteractionService userInteractionService;
 
     @Autowired
-    DatabaseController databaseController;
+    RecommendationSystem recommendationSystem;
 
     @Autowired
     RatingEventController ratingStorageService;
@@ -30,57 +28,40 @@ public class RecommendationSystemController {
     @Autowired
     ViewEventController viewStorageService;
 
+    @Autowired
+    RatingRepository ratingRepository;
+
     @PostMapping("/rating")
     public ResponseEntity<String> rating(@RequestBody RatingRequest request) throws SQLException {
-        boolean validUser = new UsernameValidator(request.user).isValid();
-        boolean validMovie = new MovieValidator(request.movie).isValid();
-        boolean validRating = new RatingValidator(request.rating).isValid();
-
-        if (validRating && validUser && validMovie) {
-            User user = new User(request.user);
-            Movie movie = new Movie(request.movie);
-            Rating rating = new Rating(request.rating);
-            ratingStorageService.saveRating(user, movie, rating);
-            return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " assigned to " + request.movie + " a rating of " + request.rating);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Movie or user do not exists or rating is not valid");
-        }
+        ratingStorageService.saveRating(request.user, request.movie, request.rating);
+        return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " assigned to " + request.movie + " a rating of " + request.rating);
     }
 
     @PostMapping("/view")
-    public ResponseEntity<String> view(@RequestBody ViewRequest request) throws SQLException {
-        boolean validUser = new UsernameValidator(request.user).isValid();
-        boolean validMovie = new MovieValidator(request.movie).isValid();
-        boolean validPercentage = new PercentageValidator(request.percentage).isValid();
-
-        if (validPercentage && validUser && validMovie) {
-            User user = new User(request.user);
-            Movie movie = new Movie(request.movie);
-            Percentage percentage = new Percentage(request.percentage);
-            viewStorageService.saveView(user, movie, percentage);
-            return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " viewed " + request.movie + " until " + request.percentage);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Movie or user do not exists or percentage is not valid");
-        }
+    public ResponseEntity<String> view(@RequestBody ViewRequest request) {
+        viewStorageService.saveView(request.user, request.movie, request.percentage);
+        return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " viewed " + request.movie + " until " + request.percentage);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Movie>> getMovies(@RequestParam(required = false) String genre,
-                                                 @RequestParam(required = false) Integer minRating,
-                                                 @RequestParam(required = false) Integer maxRating) throws SQLException {
-        return ResponseEntity.status(HttpStatus.OK).body(databaseController.findMovies(genre, minRating, maxRating));
+    public ResponseEntity<List<Object[]>> getMovies(@RequestParam(required = false) String genre,
+                                                    @RequestParam(required = false) Integer minRating,
+                                                    @RequestParam(required = false) Integer maxRating) {
+
+        List<Object[]> movies = ratingRepository.findMovies(genre, minRating, maxRating);
+        return ResponseEntity.status(HttpStatus.OK).body(movies);
     }
 
     @GetMapping("/{username}")
     public ResponseEntity<List<UserInteraction>> getUserInteractions(
             @PathVariable String username,
-            @RequestParam(value = "type", required = false) String type) throws SQLException {
+            @RequestParam(value = "type", required = false) String type) {
 
         return ResponseEntity.status(HttpStatus.OK).body(userInteractionService.getUserInteractions(username, type));
     }
 
     @GetMapping("/recommend")
-    public ResponseEntity<List<Movie>> getRecommendationFor(@RequestParam String username) throws SQLException {
-        return ResponseEntity.status(HttpStatus.OK).body(databaseController.recommendByUsername(username));
+    public ResponseEntity<Set<String>> getRecommendationFor(@RequestParam String username) {
+        return ResponseEntity.status(HttpStatus.OK).body(recommendationSystem.recommendByUsername(username));
     }
 }
