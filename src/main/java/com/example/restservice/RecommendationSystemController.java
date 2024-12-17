@@ -39,8 +39,8 @@ public class RecommendationSystemController {
 
     @PostMapping("/view")
     public ResponseEntity<String> view(@RequestBody ViewRequest request) {
-        viewStorageService.saveView(request.user, request.movie, request.percentage);
-        return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " viewed " + request.movie + " until " + request.percentage);
+        viewStorageService.saveView(request.user, request.movie, request.viewPercentage);
+        return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " viewed " + request.movie + " until " + request.viewPercentage);
     }
 
     @GetMapping("/search")

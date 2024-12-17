@@ -6,13 +6,13 @@ public class UserInteraction {
 
     private String movieTitle;
     private Integer rating;
-    private Optional<Integer> percentage;
+    private Optional<Integer> viewPercentage;
     private Optional<Boolean> implicitRating;
 
-    public UserInteraction(String movie, Integer rating, Integer percentage, Boolean implicitRating) {
+    public UserInteraction(String movie, Integer rating, Integer viewPercentage, Boolean implicitRating) {
         this.movieTitle = movie;
         this.rating = rating;
-        this.percentage = Optional.ofNullable(percentage);
+        this.viewPercentage = Optional.ofNullable(viewPercentage);
         this.implicitRating = Optional.ofNullable(implicitRating);
     }
 
@@ -25,7 +25,7 @@ public class UserInteraction {
     }
 
     public Optional<Integer> getPercentage() {
-        return percentage;
+        return viewPercentage;
     }
 
     public Optional<Boolean> getImplicitRating() {

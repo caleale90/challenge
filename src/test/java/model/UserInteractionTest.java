@@ -12,14 +12,14 @@ class UserInteractionTest {
     void testConstructorWithAllValues() {
         String movieTitle = "Inception";
         int rating = 5;
-        int percentage = 85;
+        int viewPercentage = 85;
         boolean implicitRating = true;
 
-        UserInteraction interaction = new UserInteraction(movieTitle, rating, percentage, implicitRating);
+        UserInteraction interaction = new UserInteraction(movieTitle, rating, viewPercentage, implicitRating);
 
         assertEquals(movieTitle, interaction.getMovieTitle());
         assertEquals(rating, interaction.getRating());
-        assertEquals(Optional.of(percentage), interaction.getPercentage());
+        assertEquals(Optional.of(viewPercentage), interaction.getPercentage());
         assertEquals(Optional.of(implicitRating), interaction.getImplicitRating());
     }
 

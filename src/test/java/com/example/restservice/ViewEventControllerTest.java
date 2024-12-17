@@ -29,7 +29,7 @@ public class ViewEventControllerTest {
 
     private String validUsername = "john_doe";
     private String validMovieTitle = "Inception";
-    private Integer percentage = 80;
+    private Integer viewPercentage = 80;
     private Integer rating = 4;
     private Long validUserId = 1L;
     private Long validMovieId = 1L;
@@ -46,9 +46,9 @@ public class ViewEventControllerTest {
 
         when(viewEventController.ratingExists(validUserId, validMovieId)).thenReturn(false);
 
-        viewEventController.saveView(validUsername, validMovieTitle, percentage);
+        viewEventController.saveView(validUsername, validMovieTitle, viewPercentage);
 
-        verify(ratingRepository, times(1)).insertRatingWithPercentage(validUserId, validMovieId, 4, percentage);
+        verify(ratingRepository, times(1)).insertRatingWithPercentage(validUserId, validMovieId, 4, viewPercentage);
         verify(ratingRepository, never()).updateRatingAndImplicitRating(anyInt(), anyBoolean(), anyLong(), anyLong());
         verify(ratingRepository, never()).updateViewPercentage(anyLong(), anyLong(), anyInt());
     }
@@ -59,11 +59,11 @@ public class ViewEventControllerTest {
         when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.of(validUserId));
 
         when(viewEventController.ratingExists(validUserId, validMovieId)).thenReturn(true);
-        doNothing().when(viewEventController).updateExistingRating(percentage, validUserId, validMovieId, rating);
+        doNothing().when(viewEventController).updateExistingRating(viewPercentage, validUserId, validMovieId, rating);
 
-        viewEventController.saveView(validUsername, validMovieTitle, percentage);
+        viewEventController.saveView(validUsername, validMovieTitle, viewPercentage);
 
-        verify(viewEventController, times(1)).updateExistingRating(percentage, validUserId, validMovieId, rating);
+        verify(viewEventController, times(1)).updateExistingRating(viewPercentage, validUserId, validMovieId, rating);
         verify(ratingRepository, never()).insertRatingWithPercentage(anyLong(), anyLong(), anyInt(), anyInt());
     }
 
@@ -73,7 +73,7 @@ public class ViewEventControllerTest {
         when(movieRepository.findIdByTitle(validMovieTitle)).thenReturn(Optional.empty());
 
         try {
-            viewEventController.saveView(validUsername, validMovieTitle, percentage);
+            viewEventController.saveView(validUsername, validMovieTitle, viewPercentage);
         } catch (RuntimeException e) {
             assertEquals("Movie not found", e.getMessage());
         }
@@ -88,7 +88,7 @@ public class ViewEventControllerTest {
         when(userRepository.findUserIdByUsername(validUsername)).thenReturn(Optional.empty());
 
         try {
-            viewEventController.saveView(validUsername, validMovieTitle, percentage);
+            viewEventController.saveView(validUsername, validMovieTitle, viewPercentage);
         } catch (RuntimeException e) {
             assertEquals("User not found", e.getMessage());
         }
@@ -104,22 +104,23 @@ public class ViewEventControllerTest {
 
         doNothing().when(ratingRepository).updateRatingAndImplicitRating(rating, true, validUserId, validMovieId);
 
-        viewEventController.updateExistingRating(percentage, validUserId, validMovieId, rating);
+        viewEventController.updateExistingRating(viewPercentage, validUserId, validMovieId, rating);
 
         verify(viewEventController, times(1)).isImplicitRating(validUserId, validMovieId);
         verify(ratingRepository, times(1)).updateRatingAndImplicitRating(4, true, validUserId, validMovieId);
-        verify(ratingRepository, never()).updateViewPercentage(anyLong(), anyLong(), anyInt());
+        verify(ratingRepository, times(1)).updateViewPercentage(validUserId, validMovieId, viewPercentage);
+
     }
 
     @Test
     public void testUpdateExistingRatingWhenIsNotImplicit() {
         doReturn(false).when(viewEventController).isImplicitRating(validUserId, validMovieId);
 
-        viewEventController.updateExistingRating(percentage, validUserId, validMovieId, rating);
+        viewEventController.updateExistingRating(viewPercentage, validUserId, validMovieId, rating);
 
         verify(viewEventController, times(1)).isImplicitRating(validUserId, validMovieId);
         verify(ratingRepository, never()).updateRatingAndImplicitRating(anyInt(), anyBoolean(), anyLong(), anyLong());
-        verify(ratingRepository, times(1)).updateViewPercentage(validUserId, validMovieId, percentage);
+        verify(ratingRepository, times(1)).updateViewPercentage(validUserId, validMovieId, viewPercentage);
     }
 
 }

@@ -45,7 +45,7 @@ public class RatingTest {
         assertEquals(user, rating.getUser(), "The user should match the expected.");
         assertEquals(movie, rating.getMovie(), "The movie should match the expected.");
         assertEquals(5, rating.getRating(), "The rating value should be 5.");
-        assertEquals(100, rating.getViewPercentage(), "The view percentage should be 100.");
+        assertEquals(100, rating.getViewPercentage(), "The view viewPercentage should be 100.");
         assertTrue(rating.getImplicitRating(), "The implicit rating should be true.");
     }
 
