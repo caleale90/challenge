@@ -1,100 +1,53 @@
 package com.example.restservice;
 
-import model.Movie;
-import model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class EventControllerTest {
+class EventControllerTest {
+
+    @Mock
+    private MovieRepository movieRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private RatingRepository ratingRepository;
 
     private EventController eventController;
-    private DatabaseConnection mockDbConnection;
-    private ResultSet mockResultSet;
 
     @BeforeEach
-    public void setUp() throws SQLException {
-        mockDbConnection = mock(DatabaseConnection.class);
-        eventController = new EventController();
-        ReflectionTestUtils.setField(eventController, "databaseConnection", mockDbConnection);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        eventController = new EventController(movieRepository, userRepository, ratingRepository);
     }
 
     @Test
-    public void testGetMovieIdFound() throws SQLException {
-        String title = "Inception";
-        int expectedMovieId = 1;
+    void ratingExistsWhenRatingsExist() {
+        Long userId = 1L;
+        Long movieId = 101L;
+        List<Rating> mockRatings = List.of(new Rating());
+        when(ratingRepository.findRatingsByUserAndMovie(userId, movieId)).thenReturn(mockRatings);
 
-        mockResultSet = mock(ResultSet.class);
-        when(mockDbConnection.executeQuery(anyString(), eq(title))).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(true);
-        when(mockResultSet.getInt("movie_id")).thenReturn(expectedMovieId);
-
-        assertEquals(expectedMovieId, eventController.getMovieId(title));
+        assertTrue(eventController.ratingExists(userId, movieId));
+        verify(ratingRepository, times(1)).findRatingsByUserAndMovie(userId, movieId);
     }
 
     @Test
-    public void testGetMovieIdNotFound() throws SQLException {
-        String title = "NonExistentMovie";
+    void ratingExistsWhenNoRatingsExist() {
+        Long userId = 2L;
+        Long movieId = 202L;
+        when(ratingRepository.findRatingsByUserAndMovie(userId, movieId)).thenReturn(Collections.emptyList());
 
-        mockResultSet = mock(ResultSet.class);
-        when(mockDbConnection.executeQuery(anyString(), eq(title))).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(false);
-
-        assertEquals(-1, eventController.getMovieId(title));
+        assertFalse(eventController.ratingExists(userId, movieId));
+        verify(ratingRepository, times(1)).findRatingsByUserAndMovie(userId, movieId);
     }
-
-    @Test
-    public void testGetUserIdFound() throws SQLException {
-        String username = "john_doe";
-        int expectedUserId = 100;
-
-        mockResultSet = mock(ResultSet.class);
-        when(mockDbConnection.executeQuery(anyString(), eq(username))).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(true);
-        when(mockResultSet.getInt("user_id")).thenReturn(expectedUserId);
-
-        assertEquals(expectedUserId, eventController.getUserId(username));
-    }
-
-    @Test
-    public void testGetUserIdNotFound() throws SQLException {
-        String username = "non_existent_user";
-
-        mockResultSet = mock(ResultSet.class);
-        when(mockDbConnection.executeQuery(anyString(), eq(username))).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(false);
-
-        assertEquals(-1, eventController.getUserId(username));
-    }
-
-    @Test
-    public void testRatingExists() throws SQLException {
-        User user = new User("john_doe");
-        Movie movie = new Movie("Inception");
-
-        mockResultSet = mock(ResultSet.class);
-        when(eventController.getRating(user, movie)).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(true);  // Simulate that a rating exists
-
-        assertTrue(eventController.ratingExists(user, movie));
-    }
-
-    @Test
-    public void testRatingNotExists() throws SQLException {
-        User user = new User("john_doe");
-        Movie movie = new Movie("NonExistentMovie");
-
-        mockResultSet = mock(ResultSet.class);
-        when(eventController.getRating(user, movie)).thenReturn(mockResultSet);
-        when(mockResultSet.next()).thenReturn(false);  // Simulate that no rating exists
-
-        assertFalse(eventController.ratingExists(user, movie));
-    }
-
 }
