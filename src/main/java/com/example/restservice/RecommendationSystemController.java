@@ -3,6 +3,8 @@ package com.example.restservice;
 import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,4 +66,47 @@ public class RecommendationSystemController {
     public ResponseEntity<Set<String>> getRecommendationFor(@RequestParam String username) {
         return ResponseEntity.status(HttpStatus.OK).body(recommendationSystem.recommendMovies(username));
     }
+
+    @Bean
+    public CommandLineRunner demo(MovieRepository repository, UserRepository userRepository, RatingRepository ratingRepository) {
+        return (args) -> {
+            Movie toyStory = new Movie("Toy Story", "Adventure|Animation|Children|Comedy|Fantasy");
+            Movie grumpierOldMen = new Movie("Grumpier Old Men", "Comedy|Romance");
+            Movie dieHard = new Movie("Die Hard", "Action|Thriller");
+            Movie sw = new Movie("Star Wars: Return of the Jedi", "Action|Adventure|Fantasy|Sci-Fi");
+            Movie tlk = new Movie("The Lion King", "Adventure|Animation|Children|Drama|Musical");
+            Movie pu = new Movie("Pulp Fiction", "Crime|Drama|Thriller");
+            Movie forrestGump = new Movie("Forrest Gump", "Comedy|Drama|Romance");
+            Movie th = new Movie("The Matrix", "Action|Sci-Fi");
+            Movie go = new Movie("Goodfellas", "Biography|Crime|Drama");
+            Movie jurassicPark = new Movie("Jurassic Park", "Adventure|Sci-Fi|Thriller");
+            repository.save(toyStory);
+            repository.save(grumpierOldMen);
+            repository.save(dieHard);
+            repository.save(sw);
+            repository.save(tlk);
+            repository.save(pu);
+            repository.save(forrestGump);
+            repository.save(th);
+            repository.save(go);
+            repository.save(jurassicPark);
+
+            User alice = new User("Alice");
+            User bob = new User("Bob");
+            User charlie = new User("Charlie");
+            userRepository.save(alice);
+            userRepository.save(bob);
+            userRepository.save(charlie);
+
+            ratingRepository.save(new Rating(alice, toyStory, 4, 85, null));
+            ratingRepository.save(new Rating(alice, grumpierOldMen, 5, null, null));
+            ratingRepository.save(new Rating(bob, toyStory, null, 90, null));
+            ratingRepository.save(new Rating(bob, dieHard, 3, null, null));
+            ratingRepository.save(new Rating(charlie, sw, null, 70, null));
+            ratingRepository.save(new Rating(charlie, grumpierOldMen, 2, null, null));
+
+        };
+    }
+
+
 }
