@@ -29,3 +29,5 @@ replay_pid*
 /target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
 /target/maven-archiver/pom.properties
 /target/classes/dump.sql
+/target/test-classes/resources/application.properties
+/target/test-classes/application.properties
