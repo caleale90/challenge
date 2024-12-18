@@ -44,7 +44,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     void insertRatingWithPercentage(@Param("userId") Long userId, @Param("movieId") Long movieId,
                                     @Param("rating") Integer rating, @Param("viewPercentage") Integer viewPercentage);
 
-    @Query("SELECT m.title, AVG(r.rating) " +
+    @Query("SELECT m.title " +
             "FROM Movie m " +
             "LEFT OUTER JOIN Rating r ON m.id = r.movie.id " +
             "WHERE (:genre IS NULL OR m.genres LIKE %:genre%) " +
@@ -52,9 +52,9 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             "HAVING " +
             "  (:minRating IS NULL OR AVG(r.rating) >= :minRating) " +
             "  AND (:maxRating IS NULL OR AVG(r.rating) <= :maxRating)")
-    List<Object[]> findMovies(@Param("genre") String genre,
-                              @Param("minRating") Integer minRating,
-                              @Param("maxRating") Integer maxRating);
+    List<String> findMovies(@Param("genre") String genre,
+                            @Param("minRating") Integer minRating,
+                            @Param("maxRating") Integer maxRating);
 
     @Query("SELECT new model.UserInteraction(m.title, r.rating, " +
             "CASE WHEN r.viewPercentage IS NOT NULL THEN r.viewPercentage ELSE NULL END, " +

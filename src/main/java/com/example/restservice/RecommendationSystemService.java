@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class RecommendationSystem {
+public class RecommendationSystemService {
 
     @Autowired
     RatingRepository ratingRepository;

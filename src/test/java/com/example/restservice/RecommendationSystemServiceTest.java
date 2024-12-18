@@ -11,13 +11,13 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class RecommendationSystemTest {
+class RecommendationSystemServiceTest {
 
     @Mock
     RatingRepository ratingRepository;
 
     @InjectMocks
-    RecommendationSystem recommendationSystem;
+    RecommendationSystemService recommendationSystemService;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +31,7 @@ class RecommendationSystemTest {
 
         when(ratingRepository.findFavouriteGenresByUsername(username)).thenReturn(favouriteGenresByUsername);
 
-        Set<String> recommendedMovies = recommendationSystem.recommendMovies(username);
+        Set<String> recommendedMovies = recommendationSystemService.recommendMovies(username);
 
         assertTrue(recommendedMovies.isEmpty());
     }
@@ -47,7 +47,7 @@ class RecommendationSystemTest {
         when(ratingRepository.findRecommendedMovies("%(Action|Comedy)%")).thenReturn(otherMoviesOfSameGenres);
         when(ratingRepository.findRatedFilms(username)).thenReturn(ratedFilms);
 
-        Set<String> recommendedMovies = recommendationSystem.recommendMovies(username);
+        Set<String> recommendedMovies = recommendationSystemService.recommendMovies(username);
 
         assertEquals(2, recommendedMovies.size());
         assertTrue(recommendedMovies.contains("Movie2"));
@@ -58,11 +58,11 @@ class RecommendationSystemTest {
 
     @Test
     void testExtractGenres(){
-        RecommendationSystem recommendationSystem = new RecommendationSystem();
+        RecommendationSystemService recommendationSystemService = new RecommendationSystemService();
         ArrayList<String> genres = new ArrayList<>();
         genres.add("1|2");
         genres.add("3|2");
-        Set<String> result = recommendationSystem.extractGenres(genres);
+        Set<String> result = recommendationSystemService.extractGenres(genres);
         assertEquals(3, result.size());
         assertTrue(result.contains("1"));
         assertTrue(result.contains("2"));

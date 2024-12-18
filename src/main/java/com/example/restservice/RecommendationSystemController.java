@@ -20,7 +20,7 @@ public class RecommendationSystemController {
     UserInteractionService userInteractionService;
 
     @Autowired
-    RecommendationSystem recommendationSystem;
+    RecommendationSystemService recommendationSystemService;
 
     @Autowired
     RatingEventController ratingStorageService;
@@ -44,11 +44,11 @@ public class RecommendationSystemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Object[]>> getMovies(@RequestParam(required = false) String genre,
+    public ResponseEntity<List<String>> getMovies(@RequestParam(required = false) String genre,
                                                     @RequestParam(required = false) Integer minRating,
                                                     @RequestParam(required = false) Integer maxRating) {
 
-        List<Object[]> movies = ratingRepository.findMovies(genre, minRating, maxRating);
+        List<String> movies = ratingRepository.findMovies(genre, minRating, maxRating);
         return ResponseEntity.status(HttpStatus.OK).body(movies);
     }
 
@@ -62,6 +62,6 @@ public class RecommendationSystemController {
 
     @GetMapping("/recommend")
     public ResponseEntity<Set<String>> getRecommendationFor(@RequestParam String username) {
-        return ResponseEntity.status(HttpStatus.OK).body(recommendationSystem.recommendMovies(username));
+        return ResponseEntity.status(HttpStatus.OK).body(recommendationSystemService.recommendMovies(username));
     }
 }

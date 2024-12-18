@@ -59,10 +59,10 @@ public class RatingRepositoryTest {
 
     @Test
     public void testFindMovies() {
-        List<Object[]> movies = ratingRepository.findMovies("Sci-Fi", null, null);
+        List<String> movies = ratingRepository.findMovies("Sci-Fi", null, null);
 
         assertEquals(1, movies.size(), "There should be one movie matching the genre.");
-        assertEquals("Inception", movies.get(0)[0], "The movie title should match.");
+        assertEquals("Inception", movies.get(0), "The movie title should match.");
     }
 
     @Test
