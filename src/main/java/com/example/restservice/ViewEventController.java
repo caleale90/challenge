@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import ratingconverter.RatingCalculator;
 
 import java.sql.SQLException;
-import java.util.List;
 
 @Service
 public class ViewEventController extends EventController {
