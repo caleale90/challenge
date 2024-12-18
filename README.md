@@ -69,7 +69,16 @@ Optionally, it accepts 3 parameters that can be used alone or in combination.
 * `minRating`
 * `maxRating`
 
-**Note:** consider that `minRating` and `maxRating` parameters act on the average of movies' ratings. 
+**Note:** consider that `minRating` and `maxRating` parameters act on the average of movies' ratings.
+
+#### Examples
+
+```
+http://localhost:8080/search
+http://localhost:8080/search?minRating=2
+http://localhost:8080/search?maxRating=4
+http://localhost:8080/search?genres=Action&minRating=2&maxRating=4
+```
 
 ### History of user interactions
 
@@ -77,6 +86,13 @@ Optionally, it accepts 3 parameters that can be used alone or in combination.
 
 Using the optional parameters `view` or `rating` it is possible to see all movies seen or rated by a user.
 
+#### Examples
+
+```
+http://localhost:8080/Alice
+http://localhost:8080/Alice?type=views
+http://localhost:8080/search?type=ratings
+```
 
 ### Movies recommendation for a user
 
