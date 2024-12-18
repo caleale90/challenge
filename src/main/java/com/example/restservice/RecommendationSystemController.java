@@ -41,6 +41,8 @@ public class RecommendationSystemController {
 
     @PostMapping("/view")
     public ResponseEntity<String> view(@RequestBody ViewRequest request) {
+        if (request.viewPercentage < 0 || request.viewPercentage > 100)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid viewPercentage: " + request.viewPercentage);
         viewStorageService.saveView(request.user, request.movie, request.viewPercentage);
         return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " viewed " + request.movie + " until " + request.viewPercentage);
     }
