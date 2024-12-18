@@ -1,4 +1,4 @@
-# Recommendation System
+# Recommendation System Challenge
 
 
 ### Getting started
@@ -26,6 +26,7 @@ The application offers many endpoints to perform various operations.
 #### Rate a movie
 
 `POST /rating` allows a user to rate a movie.
+
 It requires a JSON body like
 
 ```
@@ -40,6 +41,7 @@ In this case it will add a rating of 4 to the "Goodfellas" movie for the user Bo
 ### View a movie
 
 `POST /view` allows perform a view event by a user.
+
 It requires a JSON body like
 
 ```
@@ -59,37 +61,28 @@ If Alice has not rated already the movie, the value "100" will be addded to the 
 
 ### Search for a movie
 
-`GET /search` allows to list movies.
-Optionally it accepts 3 parameters that can be used alone or in combination.
+`GET /search` to list movies.
+
+Optionally, it accepts 3 parameters that can be used alone or in combination.
 
 * `genre`
 * `minRating`
 * `maxRating`
 
+**Note:** consider that `minRating` and `maxRating` parameters act on the average of movies' ratings. 
+
+### History of user interactions
+
+`GET /{username}` to see all ratings given by a user
+
+Using the optional parameters `view` or `rating` it is possible to see all movies seen or rated by a user.
 
 
+### Movies recommendation for a user
 
+`GET /recommend` to get movies recommended for a user.
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Object[]>> getMovies(@RequestParam(required = false) String genre,
-                                                    @RequestParam(required = false) Integer minRating,
-                                                    @RequestParam(required = false) Integer maxRating) {
-
-        List<Object[]> movies = ratingRepository.findMovies(genre, minRating, maxRating);
-        return ResponseEntity.status(HttpStatus.OK).body(movies);
-    }
-
-    @GetMapping("/{username}")
-    public ResponseEntity<List<UserInteraction>> getUserInteractions(
-            @PathVariable String username,
-            @RequestParam(value = "type", required = false) String type) {
-
-        return ResponseEntity.status(HttpStatus.OK).body(userInteractionService.getUserInteractions(username, type));
-    }
-
-    @GetMapping("/recommend")
-    public ResponseEntity<Set<String>> getRecommendationFor(@RequestParam String username) {
-        return ResponseEntity.status(HttpStatus.OK).body(recommendationSystem.recommendMovies(username));
-    }
+It starts from the `ratings` table, takes genres of movies rated with 4 or 5 by a user.
+Then it selects movies of those genres and finally removes from the obtained set movies already rated.
 
 
