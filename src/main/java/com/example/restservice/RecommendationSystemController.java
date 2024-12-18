@@ -49,8 +49,8 @@ public class RecommendationSystemController {
 
     @GetMapping("/search")
     public ResponseEntity<List<String>> getMovies(@RequestParam(required = false) String genre,
-                                                    @RequestParam(required = false) Integer minRating,
-                                                    @RequestParam(required = false) Integer maxRating) {
+                                                  @RequestParam(required = false) Integer minRating,
+                                                  @RequestParam(required = false) Integer maxRating) {
 
         List<String> movies = ratingRepository.findMovies(genre, minRating, maxRating);
         return ResponseEntity.status(HttpStatus.OK).body(movies);
