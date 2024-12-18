@@ -34,7 +34,7 @@ public class RecommendationSystemController {
     @PostMapping("/rating")
     public ResponseEntity<String> rating(@RequestBody RatingRequest request) throws SQLException {
         if (request.rating < 0 || request.rating > 5)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid rating" + request.rating);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid rating: " + request.rating);
         ratingStorageService.saveRating(request.user, request.movie, request.rating);
         return ResponseEntity.status(HttpStatus.OK).body("User " + request.user + " assigned to " + request.movie + " a rating of " + request.rating);
     }
