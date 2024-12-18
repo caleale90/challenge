@@ -139,12 +139,12 @@ COPY public.movies (id, genres, title) FROM stdin;
 --
 
 COPY public.ratings (id, implicit_rating, rating, view_percentage, movie_id, user_id) FROM stdin;
-1	\N	4	85	1	1
-2	\N	5	\N	2	1
-3	\N	\N	90	1	2
-4	\N	3	\N	3	2
-5	\N	\N	70	4	3
-6	\N	2	\N	2	3
+1	TRUE	4	85	1	1
+2	FALSE	5	\N	2	1
+3	TRUE	\N	90	1	2
+4	FALSE	3	\N	3	2
+5	TRUE	\N	70	4	3
+6	FALSE	2	\N	2	3
 \.
 
 
