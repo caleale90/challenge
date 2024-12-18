@@ -62,7 +62,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             "FROM Rating r " +
             "JOIN r.user u " +
             "JOIN r.movie m " +
-            "WHERE u.username = :username")
+            "WHERE u.username = :username AND r.rating IS NOT NULL")
     List<UserInteraction> historyByUser(@Param("username") String username);
 
     @Query("SELECT new model.UserInteraction(m.title, r.rating, " +
@@ -71,7 +71,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             "FROM Rating r " +
             "JOIN r.user u " +
             "JOIN r.movie m " +
-            "WHERE u.username = :username " +
+            "WHERE u.username = :username AND r.rating IS NOT NULL " +
             "AND (:interactionType = 'RATING' AND r.implicitRating = false " +
             "OR :interactionType != 'RATING' AND r.viewPercentage IS NOT NULL)")
     List<UserInteraction> historyByUsernameAndType(@Param("username") String username,
