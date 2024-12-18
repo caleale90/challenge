@@ -27,7 +27,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testFindUserIdByUsername_UserExists() {
+    public void testFindUserIdByUsernameWhenUserExists() {
         Optional<Long> userIdOptional = userRepository.findUserIdByUsername("JohnDoe");
 
         assertTrue(userIdOptional.isPresent(), "User ID should be found for the given username.");
@@ -35,7 +35,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testFindUserIdByUsername_UserDoesNotExist() {
+    public void testFindUserIdByUsernameWhenUserDoesNotExist() {
         Optional<Long> userIdOptional = userRepository.findUserIdByUsername("JaneDoe");
 
         assertFalse(userIdOptional.isPresent(), "No User ID should be found for a nonexistent username.");
