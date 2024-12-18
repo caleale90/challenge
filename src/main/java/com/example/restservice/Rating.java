@@ -24,6 +24,13 @@ public class Rating {
 
     protected Rating() {}
 
+    @PrePersist
+    public void prePersist() {
+        if (this.implicitRating == null) {
+            this.implicitRating = true; // Set to true if not explicitly set
+        }
+    }
+
     public Rating(User user, Movie movie, Integer rating, Integer viewPercentage, Boolean implicitRating) {
         this.user = user;
         this.movie = movie;
