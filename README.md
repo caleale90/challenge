@@ -85,7 +85,9 @@ http://localhost:8080/search?genres=Action&minRating=2&maxRating=4
 
 `GET /{username}` to see all ratings given by a user
 
-Using the optional parameters `view` or `rating` it is possible to see all movies seen or rated by a user.
+Using the optional parameters `view` or `ratings` it is possible to see all movies seen or rated by a user.
+For the `view` parameter, the query selects only ratings with `viewPercentage` set.
+For the `ratings` parameter, the query selects only ratings where `implicit_rating` is set to `false`. 
 
 ##### Examples
 
