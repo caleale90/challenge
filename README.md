@@ -34,8 +34,6 @@ It requires a JSON body like
 }
 ```
 
-Example
-
 In this case it will add a rating of 4 to the "Goodfellas" movie for the user Bob.
 
 #### View a movie
