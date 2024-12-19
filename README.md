@@ -69,6 +69,8 @@ Optionally, it accepts 3 parameters that can be used alone or in combination.
 * `maxRating`
 
 **Note:** consider that `minRating` and `maxRating` parameters act on the average of movies' ratings.
+The underlying query calculates the average rating for each rated movie. Subsequently, the optional parameters mentioned
+above are applied to filter movies with at least or at most a certain rating.
 
 ##### Examples
 
