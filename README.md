@@ -51,9 +51,10 @@ It requires a JSON body like
 ```
 
 This means tha Alice saw the "Forrest Gump" movie until 100%.
-This enpoint transforms also the view percentage into a rating.
+This endpoint transforms also the view percentage into a rating implicitly.
 This rating is stored into the DB only if the user has not rated the movie explicitly before.
-For example, if Alice already rated this movie explicitly, the value "100" is added to the `view_percentage` column.
+For example, if Alice already rated this movie explicitly, only the value "100" is added to the `view_percentage`
+column.
 If Alice has not rated already the movie, the value "100" will be addded to the `view_percentage` column and a rating of
 5 will be added to the `rating` column. A boolean value of true is also set to `implicit_rating` column.
 
