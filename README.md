@@ -101,8 +101,8 @@ http://localhost:8080/search?type=ratings
 
 `GET /recommend` to get movies recommended for a user.
 
-It starts from the `ratings` table, takes genres of movies rated with 4 or 5 by a user.
-Then it selects movies of those genres and finally removes from the obtained set movies already rated.
+It starts from the `ratings` table, taking genres of movies rated with 4 or 5 by a user.
+Then it selects movies of those genres from `movies` table and finally removes from the obtained set movies already rated.
 
 ##### Examples
 
